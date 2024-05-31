@@ -1,63 +1,77 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ToolBar from './ToolBar';
 import Table from './Table';
 import Pagination from './Pagination';
-import countries from '../../constants/countries';
+import countries from '../../constants/countries.json';
 
 function Home() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCountries, setSelectedCountries] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [entriesPerPage, setEntriesPerPage] = useState(10);
-    const [dataToShow, setDataToShow] = useState(countries.data.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage));
+    const [state, setState] = useState({
+        searchTerm: '',
+        selectedCountries: [],
+        currentPage: 1,
+        totalPages: 1,
+        entriesPerPage: 10,
+        countryList: countries.data,
+        dataToShow: [],
+    });
 
-    const totalPages = Math.ceil(countries.data.length / entriesPerPage);
+    const { searchTerm, selectedCountries, currentPage, totalPages, entriesPerPage, countryList, dataToShow } = state;
 
-    const handleCheckboxChange = (country) => {
-        setSelectedCountries((prevSelected) =>
-            prevSelected.some((c) => c.code === country.code)
-                ? prevSelected.filter((c) => c.code !== country.code)
-                : [...prevSelected, country]
-        );
-    };
+    const updateDataToShow = useCallback((page, entries) => {
+        const start = (page - 1) * entries;
+        const end = start + entries;
+        return countryList.slice(start, end);
+    }, [countryList]);
+
+    useEffect(() => {
+        const newTotalPages = Math.ceil(countryList.length / entriesPerPage);
+        const newDataToShow = updateDataToShow(currentPage, entriesPerPage);
+        setState(prevState => ({ ...prevState, totalPages: newTotalPages, dataToShow: newDataToShow }));
+    }, [entriesPerPage, countryList, currentPage, updateDataToShow]);
+
+    const handleCheckboxChange = useCallback((country) => {
+        setState(prevState => ({
+            ...prevState,
+            selectedCountries: prevState.selectedCountries.some((c) => c.code === country.code)
+                ? prevState.selectedCountries.filter((c) => c.code !== country.code)
+                : [...prevState.selectedCountries, country]
+        }));
+    }, []);
 
     const handleResetClick = () => {
-        const defaultEntriesPerPage = 10;
-        const initialFilteredData = [...countries.data];
-
-        setSearchTerm('');
-        setCurrentPage(1);
-        setSelectedCountries([]);
-        setEntriesPerPage(defaultEntriesPerPage);
-
-        const start = 0;
-        const end = start + defaultEntriesPerPage;
-        setDataToShow(initialFilteredData.slice(start, end));
+        setState(prevState => ({
+            ...prevState,
+            selectedCountries: [],
+            currentPage: 1,
+            searchTerm: '',
+            countryList: countries.data,
+        }));
     };
+
     const handleSearchTermChange = (value) => {
-        setSearchTerm(value);
-        setCurrentPage(1);
-        const filteredData = countries.data.filter(item => 
-            item.name.toString().toLowerCase().includes(value.toLowerCase())
-        );
-        const start = 0;
-        const end = start + entriesPerPage;
-        setDataToShow(filteredData.slice(start, end));
+        setState(prevState => ({
+            ...prevState,
+            searchTerm: value,
+            currentPage: 1,
+            countryList: countries.data.filter(country => country.name.toLowerCase().includes(value.toLowerCase()))
+        }));
     };
-    
+
     const handleEntriesChange = (value) => {
-        setEntriesPerPage(value);
-        setCurrentPage(1);
-        const start = 0;
-        const end = start + value;
-        setDataToShow(countries.data.slice(start, end));
+        setState(prevState => ({
+            ...prevState,
+            entriesPerPage: value,
+            currentPage: 1,
+            dataToShow: updateDataToShow(1, value)
+        }));
     };
-    
+
     const handlePageChange = (page) => {
-        setCurrentPage(page);
-        const start = (page - 1) * entriesPerPage;
-        const end = start + entriesPerPage;
-        setDataToShow(countries.data.slice(start, end));
+        setState(prevState => ({
+            ...prevState,
+            currentPage: page,
+            dataToShow: updateDataToShow(page, entriesPerPage)
+        }));
     };
 
     const handleButtonClick = () => {
@@ -77,11 +91,10 @@ function Home() {
                 selectedCountries={selectedCountries}
                 onSearchTermChange={handleSearchTermChange}
             />
-            
-            {dataToShow.length ? (
+            {countryList.length ? (
                 <>
                     <Table
-                        fetchedCountries={dataToShow}
+                        countryList={dataToShow}
                         selectedCountries={selectedCountries}
                         handleCheckboxChange={handleCheckboxChange}
                     />
@@ -102,6 +115,3 @@ function Home() {
 }
 
 export default Home;
-
-
-

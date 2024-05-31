@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import TableRow from './TableRow';
 import classNames from 'classnames';
 
-function Table({ fetchedCountries, selectedCountries, handleCheckboxChange }) {
+function Table({ countryList, selectedCountries, handleCheckboxChange }) {
     const isSelected = (country) => selectedCountries.some(c => c.code === country.code);
 
     return (
@@ -26,7 +26,7 @@ function Table({ fetchedCountries, selectedCountries, handleCheckboxChange }) {
                             type={'secondary'}
                         />
                     ))}
-                    {fetchedCountries?.map((country, index) => (
+                    {countryList?.map((country, index) => (
                         <TableRow
                             key={country.code}
                             country={country}
@@ -43,7 +43,7 @@ function Table({ fetchedCountries, selectedCountries, handleCheckboxChange }) {
 }
 
 Table.propTypes = {
-    fetchedCountries: PropTypes.arrayOf(
+    countryList: PropTypes.arrayOf(
         PropTypes.shape({
             code: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired
