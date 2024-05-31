@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from './common/Button';
 
-function Pagination({ currentPage, totalPages, entriesPerPage, handleEntriesChange, setCurrentPage }) {
+function Pagination({ currentPage, totalPages, entriesPerPage, handleEntriesChange, onHandlePageChange }) {
     return (
         <div className='flex items-center justify-between mt-2'>
             <div className='flex'>
                 <Button
-                    onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
+                    onClick={() => onHandlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     type={'secondary'}
                     label='Previous Page'
@@ -15,7 +15,7 @@ function Pagination({ currentPage, totalPages, entriesPerPage, handleEntriesChan
                     <i className='fas fa-arrow-left'></i>
                 </Button>
                 <Button
-                    onClick={() => setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))}
+                    onClick={() => onHandlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     type={'secondary'}
                     label='Next Page'
@@ -48,7 +48,7 @@ Pagination.propTypes = {
     totalPages: PropTypes.number.isRequired,
     entriesPerPage: PropTypes.number.isRequired,
     handleEntriesChange: PropTypes.func.isRequired,
-    setCurrentPage: PropTypes.func.isRequired,
+    onHandlePageChange: PropTypes.func.isRequired,
 };
 
 export default Pagination;

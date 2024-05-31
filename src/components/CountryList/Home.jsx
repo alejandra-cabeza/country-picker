@@ -11,7 +11,7 @@ function Home() {
     const [entriesPerPage, setEntriesPerPage] = useState(10);
     const [dataToShow, setDataToShow] = useState(countries.data.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage));
 
-    const totalPages = Math.ceil(dataToShow.length / entriesPerPage);
+    const totalPages = Math.ceil(countries.data.length / entriesPerPage);
 
     const handleCheckboxChange = (country) => {
         setSelectedCountries((prevSelected) =>
@@ -22,23 +22,42 @@ function Home() {
     };
 
     const handleResetClick = () => {
-        setSelectedCountries([]);
-        setCurrentPage(1);
-        setSearchTerm('');
-    };
+        const defaultEntriesPerPage = 10;
+        const initialFilteredData = [...countries.data];
 
+        setSearchTerm('');
+        setCurrentPage(1);
+        setSelectedCountries([]);
+        setEntriesPerPage(defaultEntriesPerPage);
+
+        const start = 0;
+        const end = start + defaultEntriesPerPage;
+        setDataToShow(initialFilteredData.slice(start, end));
+    };
     const handleSearchTermChange = (value) => {
         setSearchTerm(value);
         setCurrentPage(1);
         const filteredData = countries.data.filter(item => 
             item.name.toString().toLowerCase().includes(value.toLowerCase())
-          );
-        setDataToShow(filteredData);
+        );
+        const start = 0;
+        const end = start + entriesPerPage;
+        setDataToShow(filteredData.slice(start, end));
     };
-
+    
     const handleEntriesChange = (value) => {
         setEntriesPerPage(value);
         setCurrentPage(1);
+        const start = 0;
+        const end = start + value;
+        setDataToShow(countries.data.slice(start, end));
+    };
+    
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        const start = (page - 1) * entriesPerPage;
+        const end = start + entriesPerPage;
+        setDataToShow(countries.data.slice(start, end));
     };
 
     const handleButtonClick = () => {
@@ -71,7 +90,7 @@ function Home() {
                         totalPages={totalPages}
                         entriesPerPage={entriesPerPage}
                         handleEntriesChange={handleEntriesChange}
-                        setCurrentPage={setCurrentPage}
+                        onHandlePageChange={handlePageChange}
                         onButtonClick={handleButtonClick}
                     />
                 </>
